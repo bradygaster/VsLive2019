@@ -27,8 +27,29 @@ async function login()
                         accessTokenFactory: () => response.data
                         // ---------------------------------------
                     })
+                    // -----------------------------------------------------
+                    // this is how you tell SignalR to reconnect when it can
+                    // -----------------------------------------------------
+                    .withAutomaticReconnect()
+                    // -----------------------------------------------------
                     .build();
+
             connection.on('userLoggedIn', (username) => addUserToList(username));
+
+            // -----------------------------------------------------
+            // this is how you tell users SignalR is reconnecting 
+            // -----------------------------------------------------
+            connection.onreconnecting((error) => {const li = document.createElement("li");
+                setStatus('Reconnecting');
+            });
+
+            // -----------------------------------------------------
+            // this is how you tell users SignalR has reconnected
+            // -----------------------------------------------------
+            connection.onreconnected((connectionId) => {
+                setStatus('Connected');
+            });
+
             start();
         })
         .catch(function(err) {
