@@ -1,18 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using VsLiveSanDiego.Services;
 
 namespace VsLiveSanDiego
 {
     public class Startup
     {
+        private const string CORS_POLICY = "default";
+        private const string HUB_ROUTE = "/hubs/hello";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,7 +31,26 @@ namespace VsLiveSanDiego
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // setup cors so javascript clients can reach back in
+            services.AddCors(options =>
+            {
+                options.AddPolicy(CORS_POLICY,
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:5000",
+                                        "https://localhost:5001")
+                                        .AllowAnyHeader()
+                                        .AllowAnyMethod();
+                });
+            });
+
             services.AddRazorPages();
+            services.AddControllers();
+            services.AddSignalR();
+
+            // wire up the IUserIdProvider we'll use for this app
+            services.AddSingleton<IUserIdProvider, UsernameUserIdProvider>();
+            services.AddSingleton<JwtBearerTokenService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +78,47 @@ namespace VsLiveSanDiego
             {
                 endpoints.MapRazorPages();
             });
+        }
+
+        private void WireUpAuth(IServiceCollection services)
+        {
+            var key = Encoding.ASCII.GetBytes(Configuration["AuthKey"]);
+            services
+                .AddAuthentication(x =>
+                {
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments(HUB_ROUTE)))
+                            {
+                                // Read the token out of the query string
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
         }
     }
 }
