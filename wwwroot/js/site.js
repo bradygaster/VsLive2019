@@ -1,4 +1,12 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿//const axios = require('axios');
 
-// Write your Javascript code.
+async function login()
+{
+    var username = document.getElementById('usernameTextbox').value;
+    console.log(username);
+
+    axios.get('/authenticate?username=' + username)
+      .then(function (response) {
+        console.log(response.data);
+      });
+}

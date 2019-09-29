@@ -46,10 +46,16 @@ namespace VsLiveSanDiego
 
             services.AddRazorPages();
             services.AddControllers();
+
+            // -------------------------------------------
+            // SHOW: we need to add the SignalR middleware
             services.AddSignalR();
+            // -------------------------------------------
 
             // wire up the IUserIdProvider we'll use for this app
             services.AddSingleton<IUserIdProvider, UsernameUserIdProvider>();
+
+            // wire up the service that will hand back JWT tokens for us
             services.AddSingleton<JwtBearerTokenService>();
         }
 
@@ -67,16 +73,22 @@ namespace VsLiveSanDiego
                 app.UseHsts();
             }
 
+            app.UseCors(CORS_POLICY);
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
+
+                // -------------------------------------------
+                // SHOW: we need to setup routes for each hub
+                endpoints.MapHub<HelloHub>(HUB_ROUTE);
+                // -------------------------------------------
             });
         }
 
