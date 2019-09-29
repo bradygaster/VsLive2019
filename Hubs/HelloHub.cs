@@ -18,6 +18,9 @@ namespace VsLiveSanDiego
         public override Task OnConnectedAsync()
         {
             Logger.LogInformation($"User {Context.User.Identity.Name} connected");
+
+            Clients.All.SendAsync("userLoggedIn", Context.User.Identity.Name);
+
             return base.OnConnectedAsync();
         }
     }

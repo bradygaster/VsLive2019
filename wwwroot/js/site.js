@@ -28,11 +28,16 @@ async function login()
                         // ---------------------------------------
                     })
                     .build();
+            connection.on('userLoggedIn', (username) => addUserToList(username));
             start();
         })
         .catch(function(err) {
             $('#errorDialog').modal();
         });
+}
+
+function addUserToList(username) {
+    console.log(username);
 }
 
 function setStatus(status) {
