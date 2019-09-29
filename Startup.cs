@@ -58,6 +58,9 @@ namespace VsLiveSanDiego
             // wire up the service that will hand back JWT tokens for us
             services.AddSingleton<JwtBearerTokenService>();
 
+            // wire up the service that will track logged-in users so we don't get dupes
+            services.AddSingleton<UserList>();
+
             // dial in the auth
             WireUpAuth(services);
         }

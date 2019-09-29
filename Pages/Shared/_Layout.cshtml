@@ -16,16 +16,21 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav mr-auto navbar-dark">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Connection Status:</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" id="connectionStatus" class="nav-link">Disconnected</a>
+                    </li>
                 </ul>
                 <form class="form-inline mt-2 mt-md-0">
-                    <input id="usernameTextbox" class="form-control mr-sm-2" type="text" placeholder="jon" aria-label="Search">
+                    <input id="usernameTextbox" class="form-control mr-sm-2" type="text" placeholder="username" aria-label="Search">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="button" onclick="login();">Login</button>
                 </form>
             </div>
         </nav>
     </header>
-
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
