@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Services\" />
+    <Folder Include="Hubs\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />

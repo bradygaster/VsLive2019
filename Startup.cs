@@ -57,6 +57,9 @@ namespace VsLiveSanDiego
 
             // wire up the service that will hand back JWT tokens for us
             services.AddSingleton<JwtBearerTokenService>();
+
+            // dial in the auth
+            WireUpAuth(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
